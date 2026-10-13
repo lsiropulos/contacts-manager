@@ -1,0 +1,173 @@
+<div class="contacts-page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Contacts Directory</h1>
+      <p class="page-subtitle">View and manage your contacts directory</p>
+    </div>
+    <button pButton type="button" (click)="showCreateDialog()">
+      <i class="pi pi-user-plus"></i>
+      <span>Add Contact</span>
+    </button>
+  </div>
+
+  <div class="table-card">
+    <p-table
+      [value]="contacts()"
+      [loading]="loading()"
+      [lazy]="true"
+      [paginator]="true"
+      [rows]="pageSize()"
+      [totalRecords]="total()"
+      [first]="first()"
+      [rowsPerPageOptions]="[5, 10, 20, 50]"
+      [paginatorDropdownAppendTo]="'body'"
+      (onPage)="onPageChange($event)"
+      [tableStyle]="{ 'min-width': '40rem' }"
+      styleClass="p-datatable-striped"
+    >
+      <ng-template #caption pTemplate="caption">
+        <form (submit)="onSearch(); $event.preventDefault()" class="flex align-items-center gap-2">
+          <span class="p-input-icon-left flex-1" style="max-width: 320px">
+            <i class="pi pi-search"></i>
+            <input
+              pInputText
+              type="text"
+              [ngModel]="searchInput()"
+              (ngModelChange)="searchInput.set($event)"
+              name="searchInput"
+              placeholder="Search by full name..."
+              style="width: auto"
+            />
+          </span>
+          <button pButton type="submit" [disabled]="isSearchDisabled()">
+            <i class="pi pi-search"></i>
+            <span>Search</span>
+          </button>
+          @if (pagination().searchTerm || searchInput()) {
+            <button
+              pButton
+              type="button"
+              severity="secondary"
+              [outlined]="true"
+              (click)="clearSearch()"
+            >
+              <i class="pi pi-times"></i>
+              <span>Clear</span>
+            </button>
+          }
+        </form>
+      </ng-template>
+
+      <ng-template #header pTemplate="header">
+        <tr>
+          <th>Full Name</th>
+          <th style="width: 100px">Age</th>
+          <th>Primary Phone</th>
+          <th style="width: 150px; text-align: center">Actions</th>
+        </tr>
+      </ng-template>
+      <ng-template #body let-contact pTemplate="body">
+        <tr>
+          <td>
+            <a [routerLink]="['/contacts', contact.id]" class="contact-name-link">
+              <div class="avatar-circle">
+                {{ getInitials(contact.fullName) }}
+              </div>
+              <span class="font-medium hover-underline">{{ contact.fullName }}</span>
+            </a>
+          </td>
+          <td>{{ contact.age }}</td>
+          <td>
+            @if (contact.primaryPhoneNumber) {
+              <div class="phone-badge">
+                <i class="pi pi-phone text-primary"></i>
+                <span>{{ contact.primaryPhoneNumber }}</span>
+              </div>
+            } @else {
+              <span class="text-muted">No primary phone</span>
+            }
+          </td>
+          <td style="text-align: center">
+            <div class="table-actions">
+              <a
+                pButton
+                [text]="true"
+                [rounded]="true"
+                severity="secondary"
+                [routerLink]="['/contacts', contact.id]"
+                pTooltip="View details"
+                tooltipPosition="top"
+              >
+                <i class="pi pi-eye"></i>
+              </a>
+              <button
+                pButton
+                type="button"
+                [text]="true"
+                [rounded]="true"
+                severity="info"
+                (click)="editContact(contact.id)"
+                pTooltip="Edit contact"
+                tooltipPosition="top"
+              >
+                <i class="pi pi-pencil"></i>
+              </button>
+              <button
+                pButton
+                type="button"
+                [text]="true"
+                [rounded]="true"
+                severity="danger"
+                (click)="confirmDelete(contact)"
+                pTooltip="Delete contact"
+                tooltipPosition="top"
+              >
+                <i class="pi pi-trash"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template #emptymessage pTemplate="emptymessage">
+        <tr>
+          <td colspan="4" class="empty-state">
+            <i class="pi pi-users empty-icon"></i>
+            <div class="empty-title">No contacts found</div>
+            <div class="empty-desc">
+              {{
+                pagination().searchTerm
+                  ? 'No contacts match your search criteria.'
+                  : 'Click "Add Contact" above to add your first contact.'
+              }}
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+
+  <p-dialog
+    [header]="dialogHeader()"
+    [visible]="displayDialog()"
+    (visibleChange)="displayDialog.set($event)"
+    [modal]="true"
+    [draggable]="false"
+    [resizable]="false"
+    [style]="{ width: '620px', maxWidth: '95vw' }"
+    [closable]="true"
+  >
+    @if (dialogLoading()) {
+      <div class="text-center p-4">
+        <i class="pi pi-spin pi-spinner text-3xl text-primary mb-2"></i>
+        <p class="text-muted">Loading contact details...</p>
+      </div>
+    } @else if (displayDialog()) {
+      <app-contact-form
+        [contact]="selectedContactToEdit()"
+        (formSubmit)="handleFormSubmit($event)"
+        (cancel)="displayDialog.set(false)"
+      >
+      </app-contact-form>
+    }
+  </p-dialog>
+</div>

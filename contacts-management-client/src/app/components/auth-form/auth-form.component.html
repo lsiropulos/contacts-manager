@@ -1,0 +1,110 @@
+<div class="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
+  <div class="w-full max-w-md space-y-8 bg-white p-8 shadow-lg rounded-xl border border-gray-100">
+    <div>
+      <h2 class="text-center text-2xl font-bold text-gray-900">
+        {{ isRegisterMode() ? 'Create your account' : 'Sign in to your account' }}
+      </h2>
+    </div>
+
+    <!-- Error Banner -->
+    @if (errorMessage()) {
+      <p-message severity="error" styleClass="w-full">
+        {{ errorMessage() }}
+      </p-message>
+    }
+
+    <form class="mt-8 space-y-6" [formGroup]="authForm" (ngSubmit)="onSubmit()">
+      <div class="space-y-5">
+        <!-- Email Field -->
+        <div class="flex flex-col gap-1.5">
+          <label for="email-address" class="block text-sm font-medium text-gray-700"
+            >Email address</label
+          >
+          <input
+            pInputText
+            id="email-address"
+            type="email"
+            formControlName="email"
+            placeholder="you@example.com"
+            class="w-full"
+          />
+
+          <!-- Email Validation Errors -->
+          @let emailControl = authForm.get('email');
+          @if (emailControl?.errors && emailControl?.touched) {
+            <div class="text-xs text-red-600 flex flex-col gap-0.5 mt-0.5">
+              @if (emailControl.errors['required']) {
+                <span>• Email address is required.</span>
+              }
+              @if (emailControl.errors['email']) {
+                <span>• Please enter a valid email address.</span>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Password Field -->
+        <div class="flex flex-col gap-1.5">
+          <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+          <p-password
+            id="password"
+            formControlName="password"
+            [toggleMask]="true"
+            [feedback]="false"
+            placeholder="••••••••"
+            [fluid]="true"
+            styleClass="w-full"
+            inputStyleClass="w-full"
+          />
+
+          <!-- Live Password Requirement Hints -->
+          @if (
+            authForm.get('password')?.errors?.['passwordRequirements'] &&
+            authForm.get('password')?.touched
+          ) {
+            <div class="text-xs text-red-600 flex flex-col gap-0.5 mt-1">
+              @if (authForm.get('password')?.errors?.['passwordRequirements']?.minlength) {
+                <span>• Passwords must be at least 6 characters.</span>
+              }
+              @if (authForm.get('password')?.errors?.['passwordRequirements']?.digit) {
+                <span>• Passwords must have at least one digit ('0'-'9').</span>
+              }
+              @if (authForm.get('password')?.errors?.['passwordRequirements']?.upper) {
+                <span>• Passwords must have at least one uppercase ('A'-'Z').</span>
+              }
+              @if (authForm.get('password')?.errors?.['passwordRequirements']?.nonAlphanumeric) {
+                <span>• Passwords must have at least one non-alphanumeric character.</span>
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Submit Button -->
+      <div>
+        <p-button
+          type="submit"
+          [disabled]="authForm.invalid || loading()"
+          [loading]="loading()"
+          [label]="isRegisterMode() ? 'Sign Up' : 'Sign In'"
+          styleClass="w-full"
+        />
+      </div>
+
+      <!-- Toggle Mode Button -->
+      <div class="text-center">
+        <p-button
+          type="button"
+          [link]="true"
+          (onClick)="toggleMode()"
+          [label]="
+            isRegisterMode()
+              ? 'Already have an account? Sign in'
+              : 'Don\'t have an account? Sign up'
+          "
+          styleClass="text-sm p-0"
+        />
+      </div>
+    </form>
+  </div>
+</div>

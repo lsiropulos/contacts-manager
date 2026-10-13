@@ -1,0 +1,166 @@
+<div class="contact-details-page">
+  <!-- Back Navigation Bar & Action Buttons -->
+  <div class="navigation-bar">
+    <a pButton [outlined]="true" routerLink="/contacts">
+      <i class="pi pi-arrow-left"></i>
+      <span>Back to Contacts</span>
+    </a>
+
+    @if (contact(); as c) {
+      <div class="details-actions">
+        <button pButton type="button" [outlined]="true" (click)="displayEditDialog.set(true)">
+          <i class="pi pi-pencil"></i>
+          <span>Edit Contact</span>
+        </button>
+
+        <!-- Delete Contact Button -->
+        <button pButton type="button" severity="danger" (click)="confirmDelete(c)">
+          <i class="pi pi-trash"></i>
+          <span>Delete Contact</span>
+        </button>
+      </div>
+    }
+  </div>
+
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="details-loading-state">
+      <i class="pi pi-spin pi-spinner text-3xl text-primary mb-3"></i>
+      <p>Loading contact details...</p>
+    </div>
+  } @else if (contact(); as c) {
+    <!-- Contact Details Content -->
+    <div class="details-content">
+      <!-- Profile Header Card -->
+      <div class="details-card header-profile-card">
+        <div class="profile-header-main">
+          <div class="large-avatar">
+            {{ getInitials(c.firstName + ' ' + c.surname) }}
+          </div>
+          <div class="profile-info">
+            <h1 class="profile-name">{{ c.firstName }} {{ c.surname }}</h1>
+          </div>
+        </div>
+      </div>
+
+      <!-- Info Grid -->
+      <div class="details-grid">
+        <!-- Personal Information Card -->
+        <div class="details-card">
+          <div class="card-section-title">
+            <i class="pi pi-user text-primary mr-2"></i>
+            Personal Information
+          </div>
+          <div class="info-list">
+            <div class="info-item">
+              <span class="info-label">First Name</span>
+              <span class="info-value">{{ c.firstName }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Surname</span>
+              <span class="info-value">{{ c.surname }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Date of Birth</span>
+              <span class="info-value">
+                <i class="pi pi-calendar text-muted mr-1"></i>
+                {{ c.dateOfBirth }}
+              </span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Age</span>
+              <span class="info-value">{{ c.age }} years</span>
+            </div>
+            <div class="info-item full-width">
+              <span class="info-label">Address</span>
+              <span class="info-value">
+                <i class="pi pi-map-marker text-muted mr-1"></i>
+                {{ c.address }}
+              </span>
+            </div>
+            <div class="info-item full-width">
+              <span class="info-label">IBAN</span>
+              <span class="info-value font-mono">
+                <i class="pi pi-credit-card text-muted mr-1"></i>
+                {{ c.iban }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Phone Numbers Card -->
+        <div class="details-card">
+          <div class="card-section-title">
+            <i class="pi pi-phone text-primary mr-2"></i>
+            Phone Numbers ({{ c.phoneNumbers.length }})
+          </div>
+
+          <div class="phones-container">
+            @for (phone of c.phoneNumbers; track phone.id || phone.number || $index) {
+              <div class="phone-detail-item" [class.is-primary]="phone.isPrimary">
+                <div class="phone-item-left">
+                  <i
+                    class="pi"
+                    [class.pi-phone]="!phone.isPrimary"
+                    [class.pi-star-fill]="phone.isPrimary"
+                  ></i>
+                  <span class="phone-number">{{ phone.number }}</span>
+                </div>
+                <div class="phone-item-right">
+                  @if (phone.isPrimary) {
+                    <p-tag severity="success" value="Primary" icon="pi pi-check"></p-tag>
+                  } @else {
+                    <p-tag severity="secondary" value="Secondary"></p-tag>
+                  }
+                  <a [href]="'tel:' + phone.number" class="phone-action-btn" title="Call">
+                    <i class="pi pi-phone"></i>
+                  </a>
+                </div>
+              </div>
+            }
+
+            @if (c.phoneNumbers.length === 0) {
+              <div class="text-muted p-3 text-center">
+                No phone numbers registered for this contact.
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Edit Dialog -->
+      <p-dialog
+        header="Edit Contact"
+        [visible]="displayEditDialog()"
+        (visibleChange)="displayEditDialog.set($event)"
+        [modal]="true"
+        [draggable]="false"
+        [resizable]="false"
+        [style]="{ width: '620px', maxWidth: '95vw' }"
+        [closable]="true"
+      >
+        @if (displayEditDialog()) {
+          <app-contact-form
+            [contact]="c"
+            (formSubmit)="handleUpdate($event)"
+            (cancel)="displayEditDialog.set(false)"
+          >
+          </app-contact-form>
+        }
+      </p-dialog>
+    </div>
+  } @else if (error()) {
+    <!-- Error / Not Found State -->
+    <div class="details-card not-found-card">
+      <i class="pi pi-exclamation-circle text-4xl text-danger mb-2"></i>
+      <h2>Contact Not Found</h2>
+      <p class="text-muted">
+        The contact you are looking for does not exist or could not be loaded.
+      </p>
+      <a pButton routerLink="/contacts" class="mt-4">
+        <i class="pi pi-users"></i>
+        <span>Return to Contacts</span>
+      </a>
+    </div>
+  }
+</div>

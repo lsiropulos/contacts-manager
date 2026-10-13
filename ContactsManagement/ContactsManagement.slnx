@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="ContactsManagementAPI/ContactsManagementAPI.csproj" />
+  <Project Path="Core/Core.csproj" />
+  <Project Path="Data/Persistence.csproj" />
+  <Project Path="Domain/Domain.csproj" />
+  <Project Path="DTOs/DTOs.csproj" Id="3d312af5-c366-4c2d-b1c1-ae123f942fdb" />
+</Solution>

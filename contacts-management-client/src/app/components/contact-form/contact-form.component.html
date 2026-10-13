@@ -1,0 +1,154 @@
+<form [formGroup]="contactForm" (ngSubmit)="onSubmit()" class="contact-form">
+  <div class="form-row two-cols">
+    @let firstNameControl = contactForm.get('firstName');
+    <div class="form-field">
+      <label for="firstName">First Name <span class="required-star">*</span></label>
+      <input
+        id="firstName"
+        pInputText
+        formControlName="firstName"
+        placeholder="e.g. John"
+        [class.ng-invalid]="firstNameControl?.touched && firstNameControl?.invalid"
+        [class.ng-dirty]="firstNameControl?.touched"
+      />
+      @if (firstNameControl?.touched && firstNameControl?.errors?.['required']) {
+        <small class="error-text">First name is required.</small>
+      }
+    </div>
+
+    @let surnameControl = contactForm.get('surname');
+    <div class="form-field">
+      <label for="surname">Surname <span class="required-star">*</span></label>
+      <input
+        id="surname"
+        pInputText
+        formControlName="surname"
+        placeholder="e.g. Doe"
+        [class.ng-invalid]="surnameControl?.touched && surnameControl?.invalid"
+        [class.ng-dirty]="surnameControl?.touched"
+      />
+      @if (surnameControl?.touched && surnameControl?.errors?.['required']) {
+        <small class="error-text">Surname is required.</small>
+      }
+    </div>
+  </div>
+
+  <div class="form-row two-cols">
+    @let dobControl = contactForm.get('dateOfBirth');
+    <div class="form-field">
+      <label for="dateOfBirth">Date of Birth <span class="required-star">*</span></label>
+      <p-datepicker
+        inputId="dateOfBirth"
+        formControlName="dateOfBirth"
+        dateFormat="yy-mm-dd"
+        [showIcon]="true"
+        placeholder="YYYY-MM-DD"
+        styleClass="w-full"
+      >
+      </p-datepicker>
+      @if (dobControl?.touched && dobControl?.errors?.['required']) {
+        <small class="error-text">Date of birth is required.</small>
+      }
+      @if (dobControl?.touched && dobControl?.errors?.['underAge']) {
+        <small class="error-text">Contact must be at least 16 years old.</small>
+      }
+    </div>
+
+    @let ibanControl = contactForm.get('iban');
+    <div class="form-field">
+      <label for="iban">IBAN <span class="required-star">*</span></label>
+      <input
+        id="iban"
+        pInputText
+        formControlName="iban"
+        placeholder="e.g. DE89370400440532013000"
+        [class.ng-invalid]="ibanControl?.touched && ibanControl?.invalid"
+        [class.ng-dirty]="ibanControl?.touched"
+      />
+      @if (ibanControl?.touched && ibanControl?.errors?.['required']) {
+        <small class="error-text">IBAN is required.</small>
+      }
+    </div>
+  </div>
+
+  <div class="form-row">
+    @let addressControl = contactForm.get('address');
+    <div class="form-field full-width">
+      <label for="address">Address <span class="required-star">*</span></label>
+      <input
+        id="address"
+        pInputText
+        formControlName="address"
+        placeholder="e.g. 123 Main Street, Berlin"
+        [class.ng-invalid]="addressControl?.touched && addressControl?.invalid"
+        [class.ng-dirty]="addressControl?.touched"
+      />
+      @if (addressControl?.touched && addressControl?.errors?.['required']) {
+        <small class="error-text">Address is required.</small>
+      }
+    </div>
+  </div>
+
+  <!-- Phone Numbers Section -->
+  <div class="phone-section">
+    <div class="phone-section-header">
+      <div>
+        <span class="section-title">Phone Numbers <span class="required-star">*</span></span>
+        <span class="section-hint">At least one number is required. Only one can be primary.</span>
+      </div>
+      <button pButton type="button" size="small" [outlined]="true" (click)="addPhoneNumber()">
+        <i class="pi pi-plus"></i>
+        <span>Add Phone</span>
+      </button>
+    </div>
+
+    <div formArrayName="phoneNumbers" class="phone-list">
+      @for (phoneGroup of phoneNumbers.controls; track phoneGroup; let i = $index) {
+        <div [formGroupName]="i" class="phone-item-card">
+          <div class="phone-input-wrapper">
+            <input
+              pInputText
+              formControlName="number"
+              placeholder="Phone Number (e.g. +49 123 456789)"
+              class="phone-input"
+            />
+          </div>
+
+          <div class="primary-toggle-wrapper">
+            <p-checkbox
+              formControlName="isPrimary"
+              [binary]="true"
+              (onChange)="onPrimaryChange(i)"
+              [inputId]="'primary-' + i"
+            >
+            </p-checkbox>
+            <label [for]="'primary-' + i" class="primary-label">Primary</label>
+          </div>
+
+          <button
+            pButton
+            type="button"
+            severity="danger"
+            [text]="true"
+            (click)="removePhoneNumber(i)"
+            [disabled]="phoneNumbers.length <= 1"
+            pTooltip="Delete phone number"
+          >
+            <i class="pi pi-trash"></i>
+          </button>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Form Actions -->
+  <div class="form-actions">
+    <button pButton type="button" [text]="true" severity="secondary" (click)="onCancel()">
+      <span>Cancel</span>
+    </button>
+    <button pButton type="submit" [disabled]="contactForm.invalid">
+      <i class="pi pi-check"></i>
+      <span>{{ isEditMode ? 'Update Contact' : 'Save Contact' }}</span>
+    </button>
+  </div>
+</form>
